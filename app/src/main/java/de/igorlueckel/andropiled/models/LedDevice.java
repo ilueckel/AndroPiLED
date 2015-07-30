@@ -1,0 +1,49 @@
+package de.igorlueckel.andropiled.models;
+
+import java.net.InetAddress;
+
+/**
+ * Created by Igor on 29.07.2015.
+ */
+public class LedDevice {
+    String name;
+    InetAddress address;
+
+    public LedDevice() {
+        setName("Test");
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public InetAddress getAddress() {
+        return address;
+    }
+
+    public void setAddress(InetAddress address) {
+        this.address = address;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        LedDevice device = (LedDevice) o;
+
+        return !(address != null ? !address.equals(device.address) : device.address != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = name != null ? name.hashCode() : 0;
+        result = 31 * result + (address != null ? address.hashCode() : 0);
+        return result;
+    }
+}
