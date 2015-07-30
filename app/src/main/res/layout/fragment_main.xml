@@ -23,7 +23,7 @@
         <View
             android:id="@+id/translucent_placeholder"
             android:layout_width="match_parent"
-            android:layout_height="50dp" />
+            android:layout_height="0dp" />
         <android.support.v7.widget.Toolbar
             android:id="@+id/toolbar_tabbar"
             android:layout_height="?attr/actionBarSize"
@@ -39,7 +39,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?attr/colorPrimary"
-            app:tabMode="fixed"
+            app:tabMode="scrollable"
             app:tabGravity="center"
             />
     </android.support.design.widget.AppBarLayout>
