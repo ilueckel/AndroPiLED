@@ -743,7 +743,22 @@ public class ColorPicker extends View {
 		}
 		if (onColorChangedListener != null && color != oldChangedListenerColor ) {
 			onColorChangedListener.onColorChanged(color);
-			oldChangedListenerColor  = color;
+			oldChangedListenerColor = color;
+		}
+		invalidate();
+	}
+
+	/**
+	 * Change the color of the center which indicates the new color.
+	 *
+	 * @param color int of the color.
+	 */
+	public void setNewCenterColorOnRestore(int color) {
+		mCenterNewColor = color;
+		mCenterNewPaint.setColor(color);
+		if (mCenterOldColor == 0) {
+			mCenterOldColor = color;
+			mCenterOldPaint.setColor(color);
 		}
 		invalidate();
 	}
@@ -876,7 +891,7 @@ public class ColorPicker extends View {
 		mShowCenterOldColor = savedState.getBoolean(STATE_SHOW_OLD_COLOR);
 		int currentColor = calculateColor(mAngle);
 		mPointerColor.setColor(currentColor);
-		setNewCenterColor(currentColor);
+		setNewCenterColorOnRestore(currentColor);
 	}
 
         public void setTouchAnywhereOnColorWheelEnabled(boolean TouchAnywhereOnColorWheelEnabled){

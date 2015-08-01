@@ -388,13 +388,22 @@ public class SVBar extends View {
 	 * @param saturation float between 0 and 1
 	 */
 	public void setSaturation(float saturation) {
+		setSaturation(saturation, true);
+	}
+
+	/**
+	 * Set the pointer on the bar. With the saturation value.
+	 *
+	 * @param saturation float between 0 and 1
+	 */
+	public void setSaturation(float saturation, boolean handle) {
 		mBarPointerPosition = Math.round((mSVToPosFactor * saturation)
 				+ mBarPointerHaloRadius);
 		calculateColor(mBarPointerPosition);
 		mBarPointerPaint.setColor(mColor);
 		// Check whether the Saturation/Value bar is added to the ColorPicker
 		// wheel
-		if (mPicker != null) {
+		if (mPicker != null && handle) {
 			mColor = mPicker.changeOpacityBarColor(mColor);
 			mPicker.setNewCenterColor(mColor);
 		}
@@ -407,13 +416,22 @@ public class SVBar extends View {
 	 * @param value float between 0 and 1
 	 */
 	public void setValue(float value) {
+		setValue(value, true);
+	}
+
+	/**
+	 * Set the pointer on the bar. With the Value value.
+	 *
+	 * @param value float between 0 and 1
+	 */
+	public void setValue(float value, boolean handle) {
 		mBarPointerPosition = Math.round((mSVToPosFactor * (1 - value))
 				+ mBarPointerHaloRadius + (mBarLength / 2));
 		calculateColor(mBarPointerPosition);
 		mBarPointerPaint.setColor(mColor);
 		// Check whether the Saturation/Value bar is added to the ColorPicker
 		// wheel
-		if (mPicker != null) {
+		if (mPicker != null && handle) {
 			mColor = mPicker.changeOpacityBarColor(mColor);
 			mPicker.setNewCenterColor(mColor);
 		}
@@ -524,9 +542,9 @@ public class SVBar extends View {
 
 		setColor(Color.HSVToColor(savedState.getFloatArray(STATE_COLOR)));
 		if (savedState.containsKey(STATE_SATURATION)) {
-			setSaturation(savedState.getFloat(STATE_SATURATION));
+			setSaturation(savedState.getFloat(STATE_SATURATION), false);
 		} else {
-			setValue(savedState.getFloat(STATE_VALUE));
+			setValue(savedState.getFloat(STATE_VALUE), false);
 		}
 	}
 }
