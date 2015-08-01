@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="24.0"
+    android:viewportHeight="24.0"
+    tools:targetApi="lollipop"
+    app:vc_viewportHeight="24.0"
+    app:vc_viewportWidth="24.0">
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="@string/path_settings_antenna"
+        app:vc_fillColor="#FF000000"
+        app:vc_pathData="@string/path_settings_antenna"/>
+</vector>
