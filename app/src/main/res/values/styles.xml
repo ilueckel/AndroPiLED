@@ -9,6 +9,7 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="android:windowTranslucentStatus" tools:targetApi="21">true</item>
+        <!--<item name="android:windowTranslucentNavigation" tools:targetApi="21">true</item>-->
     </style>
 
     <style name="Widget.MyApp.ActionBar" parent="Widget.AppCompat.ActionBar">

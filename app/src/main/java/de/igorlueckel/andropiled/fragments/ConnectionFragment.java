@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ScrollView;
 
 import com.skyfishjy.library.RippleBackground;
 
@@ -24,6 +25,9 @@ public class ConnectionFragment extends Fragment {
 
     @InjectView(R.id.rippleDeviceDiscover)
     RippleBackground rippleBackground;
+
+    @InjectView(R.id.connectionFragmentScrollView)
+    ScrollView scrollView;
 
      /**
      * Use this factory method to create a new instance of

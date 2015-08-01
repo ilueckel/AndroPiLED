@@ -1,6 +1,7 @@
 package de.igorlueckel.andropiled.fragments;
 
 import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -10,6 +11,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -34,9 +36,6 @@ public class MainActivityFragment extends Fragment {
 
     @InjectView(R.id.app_bar_layout)
     AppBarLayout appBarLayout;
-
-    @InjectView(R.id.translucent_placeholder)
-    View translucent_placeholder;
 
     public MainActivityFragment() {
     }
@@ -112,11 +111,9 @@ public class MainActivityFragment extends Fragment {
 
     private void setupToolbar() {
         mToolbar.setTitle("AndroPiLed");
-        //mToolbar.setMinimumHeight(mToolbar.getHeight() + getStatusBarHeight());
-        //appBarLayout.setPadding(0, getStatusBarHeight(), 0, 0);
-        ViewGroup.LayoutParams layoutParams = translucent_placeholder.getLayoutParams();
-        layoutParams.height = getStatusBarHeight();
-        translucent_placeholder.setLayoutParams(layoutParams);
+        CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) mViewPager.getLayoutParams();
+        layoutParams.bottomMargin = -getStatusBarHeight();
+        mViewPager.setLayoutParams(layoutParams);
     }
 
     public void onEvent(ColorChangedEvent event) {
@@ -124,8 +121,6 @@ public class MainActivityFragment extends Fragment {
             mToolbar.setBackgroundColor(event.getColor());
         if (mTabLayout != null)
             mTabLayout.setBackgroundColor(event.getColor());
-        if (translucent_placeholder != null)
-            translucent_placeholder.setBackgroundColor(event.getColor());
     }
 
     public int getStatusBarHeight() {
