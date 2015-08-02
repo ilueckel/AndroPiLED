@@ -11,7 +11,9 @@ import android.widget.TextView;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import de.greenrobot.event.EventBus;
 import de.igorlueckel.andropiled.R;
+import de.igorlueckel.andropiled.events.DeviceSelectedEvent;
 import de.igorlueckel.andropiled.models.LedDevice;
 
 /**
@@ -41,12 +43,18 @@ public class DeviceAdapter extends AbstractListAdapter<LedDevice, DeviceAdapter.
 
         public void bind(final LedDevice ledDevice) {
             textViewDeviceName.setText(ledDevice.getAddress().toString());
+            radioButton.setOnCheckedChangeListener(null);
+            radioButton.setChecked(ledDevice.isSelected());
             radioButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-
+                    if (isChecked) {
+                        ledDevice.setSelected(true);
+                        EventBus.getDefault().post(new DeviceSelectedEvent(ledDevice));
+                    }
                 }
             });
+
         }
     }
 

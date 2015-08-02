@@ -70,7 +70,7 @@
                 <de.igorlueckel.andropiled.controls.EmptyRecyclerView
                     android:id="@+id/devicesRecyclerView"
                     android:layout_width="match_parent"
-                    android:layout_height="400dp"
+                    android:layout_height="150dp"
                     android:layout_below="@id/textView"
                     android:paddingTop="3dp"
                     android:focusable="false">

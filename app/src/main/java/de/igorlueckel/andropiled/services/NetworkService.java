@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 import de.greenrobot.event.EventBus;
 import de.igorlueckel.andropiled.events.ColorChangedEvent;
 import de.igorlueckel.andropiled.events.DeviceDiscoveredEvent;
+import de.igorlueckel.andropiled.events.DeviceSelectedEvent;
 import de.igorlueckel.andropiled.events.DevicesRequestEvent;
 import de.igorlueckel.andropiled.events.DevicesResponseEvent;
 import de.igorlueckel.andropiled.handlers.IncomingPacketHandler;
@@ -36,9 +37,11 @@ public class NetworkService extends IntentService {
     Thread discoveredRaspberryThread;
     ExecutorService executorService = Executors.newCachedThreadPool();
 
+    // Active device
+    LedDevice selectedDevice;
+
     public NetworkService() {
         super("NetworkService");
-
         // Handle incoming UDP answers from devices
         IncomingPacketHandler incomingPacketHandler = new IncomingPacketHandler() {
             @Override
@@ -49,7 +52,7 @@ public class NetworkService extends IntentService {
                     device.setAddress(datagramPacket.getAddress());
                     if (!discoveredRaspberryAddresses.contains(device)) {
                         discoveredRaspberryAddresses.add(device);
-                        EventBus.getDefault().post(new DeviceDiscoveredEvent(device));
+                        EventBus.getDefault().post(new DevicesResponseEvent(getDiscoveredRaspberryAddresses()));
                     }
                 }
             }
@@ -61,12 +64,15 @@ public class NetworkService extends IntentService {
             @Override
             public void run() {
                 try {
-                    while (discoveredRaspberryAddresses != null) {
+                    for (int i = 0; i < 10; i++)
                         checkForIp();
+
+                    while (discoveredRaspberryAddresses != null) {
                         if (discoveredRaspberryAddresses.isEmpty())
                             TimeUnit.SECONDS.sleep(5);
                         else
-                            TimeUnit.SECONDS.sleep(30);
+                            TimeUnit.SECONDS.sleep(10);
+                        checkForIp();
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -98,6 +104,13 @@ public class NetworkService extends IntentService {
     public void onDestroy() {
         super.onDestroy();
         EventBus.getDefault().unregister(this);
+        udpMessenger.stopMessageReceiver();
+        executorService.shutdown();
+        try {
+            executorService.awaitTermination(1, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public class NetworkBinder extends Binder {
@@ -146,5 +159,24 @@ public class NetworkService extends IntentService {
 
     public void onEvent(DevicesRequestEvent event) {
         EventBus.getDefault().post(new DevicesResponseEvent(getDiscoveredRaspberryAddresses()));
+    }
+
+    public void onEvent(DeviceSelectedEvent deviceSelectedEvent) {
+        selectedDevice = deviceSelectedEvent.getDevice();
+        int location = getLocation(discoveredRaspberryAddresses, deviceSelectedEvent.getDevice());
+        for (int i = 0; i < discoveredRaspberryAddresses.size(); i++)
+            if (i != location)
+                discoveredRaspberryAddresses.get(i).setSelected(false);
+        EventBus.getDefault().post(new DevicesResponseEvent(getDiscoveredRaspberryAddresses()));
+    }
+
+    private int getLocation(List<LedDevice> data, LedDevice entity) {
+        for (int j = 0; j < data.size(); ++j) {
+            LedDevice newEntity = data.get(j);
+            if (entity.equals(newEntity)) {
+                return j;
+            }
+        }
+        return -1;
     }
 }

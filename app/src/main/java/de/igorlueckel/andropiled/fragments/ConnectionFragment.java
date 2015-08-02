@@ -140,7 +140,8 @@ public class ConnectionFragment extends Fragment {
     }
 
     public void onEvent(DeviceDiscoveredEvent deviceDiscoveredEvent) {
-        List<LedDevice> device = Collections.singletonList(deviceDiscoveredEvent.getDevice());
-        devicesAdapter.updateData(device);
+//        List<LedDevice> device = Collections.singletonList(deviceDiscoveredEvent.getDevice());
+//        devicesAdapter.updateData(device);
+        //EventBus.getDefault().post(new DevicesRequestEvent());
     }
 }

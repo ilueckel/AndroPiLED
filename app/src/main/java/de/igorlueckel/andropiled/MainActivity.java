@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
         Intent networkServiceIntent = new Intent(getApplicationContext(), NetworkService.class);
         networkServiceIntent.putExtra("action", "start Discovery");
-        //bindService(networkServiceIntent, mConnection, Context.BIND_AUTO_CREATE);
+        bindService(networkServiceIntent, mConnection, Context.BIND_AUTO_CREATE);
         startService(networkServiceIntent);
     }
 

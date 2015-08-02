@@ -8,6 +8,7 @@ import java.net.InetAddress;
 public class LedDevice {
     String name;
     InetAddress address;
+    boolean selected = false;
 
     public LedDevice() {
         setName("Test");
@@ -29,6 +30,14 @@ public class LedDevice {
         this.address = address;
     }
 
+    public boolean isSelected() {
+        return selected;
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -37,7 +46,6 @@ public class LedDevice {
         LedDevice device = (LedDevice) o;
 
         return !(address != null ? !address.equals(device.address) : device.address != null);
-
     }
 
     @Override

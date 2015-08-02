@@ -12,12 +12,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import de.greenrobot.event.EventBus;
 import de.igorlueckel.andropiled.R;
 import de.igorlueckel.andropiled.events.ColorChangedEvent;
+import de.igorlueckel.andropiled.events.DeviceSelectedEvent;
+import de.igorlueckel.andropiled.events.DevicesResponseEvent;
+import de.igorlueckel.andropiled.models.LedDevice;
 
 
 /**
