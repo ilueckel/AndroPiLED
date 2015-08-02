@@ -3,8 +3,10 @@ package de.igorlueckel.andropiled.fragments;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -13,11 +15,22 @@ import android.widget.ScrollView;
 import com.skyfishjy.library.RippleBackground;
 import com.wnafee.vector.compat.ResourcesCompat;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import de.greenrobot.event.EventBus;
 import de.igorlueckel.andropiled.R;
+import de.igorlueckel.andropiled.adapters.DeviceAdapter;
+import de.igorlueckel.andropiled.controls.EmptyRecyclerView;
 import de.igorlueckel.andropiled.events.ColorChangedEvent;
+import de.igorlueckel.andropiled.events.DeviceDiscoveredEvent;
+import de.igorlueckel.andropiled.events.DevicesRequestEvent;
+import de.igorlueckel.andropiled.events.DevicesResponseEvent;
+import de.igorlueckel.andropiled.models.LedDevice;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -33,10 +46,12 @@ public class ConnectionFragment extends Fragment {
     ScrollView scrollView;
 
     @InjectView(R.id.devicesRecyclerView)
-    RecyclerView recyclerView;
+    EmptyRecyclerView recyclerView;
 
     @InjectView(R.id.imageDeviceSearch)
     ImageView scanningImageView;
+
+    private DeviceAdapter devicesAdapter;
 
      /**
      * Use this factory method to create a new instance of
@@ -65,8 +80,8 @@ public class ConnectionFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EventBus.getDefault().register(this);
-        if (getArguments() != null) {
-        }
+//        if (getArguments() != null) {
+//        }
     }
 
     @Override
@@ -78,7 +93,35 @@ public class ConnectionFragment extends Fragment {
         // Prevent the view hanging in the middle of nowhere at the beginning
         // Because we are using a RecyclerView in a ScrollView - yeah I know...
         recyclerView.setFocusable(false);
-        scanningImageView.setImageDrawable(ResourcesCompat.getDrawable(getActivity().getApplicationContext(), R.drawable.ic_settings_input_antenna));
+        scanningImageView.setImageDrawable(ResourcesCompat.getDrawable(root.getContext(), R.drawable.ic_settings_input_antenna));
+
+        // use this setting to improve performance if you know that changes
+        // in content do not change the layout size of the RecyclerView
+        recyclerView.setHasFixedSize(true);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(root.getContext());
+        recyclerView.setLayoutManager(layoutManager);
+        devicesAdapter = new DeviceAdapter(root.getContext());
+        recyclerView.setAdapter(devicesAdapter);
+        recyclerView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                int action = event.getAction();
+                switch (action) {
+                    case MotionEvent.ACTION_DOWN:
+                        // Disallow ScrollView to intercept touch events.
+                        v.getParent().requestDisallowInterceptTouchEvent(true);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        // Allow ScrollView to intercept touch events.
+                        v.getParent().requestDisallowInterceptTouchEvent(false);
+                        break;
+                }
+                // Handle ListView touch events.
+                v.onTouchEvent(event);
+                return true;
+            }
+        });
+        EventBus.getDefault().post(new DevicesRequestEvent());
         return root;
     }
 
@@ -88,7 +131,16 @@ public class ConnectionFragment extends Fragment {
 
     }
 
-    public void onEvent(ColorChangedEvent event) {
+    public void onEvent(ColorChangedEvent colorChangedEvent) {
         // We can not change the ripple background color :/
+    }
+
+    public void onEvent(DevicesResponseEvent devicesResponseEvent) {
+        devicesAdapter.updateData(devicesResponseEvent.getLedDevices());
+    }
+
+    public void onEvent(DeviceDiscoveredEvent deviceDiscoveredEvent) {
+        List<LedDevice> device = Collections.singletonList(deviceDiscoveredEvent.getDevice());
+        devicesAdapter.updateData(device);
     }
 }

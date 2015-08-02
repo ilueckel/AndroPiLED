@@ -29,5 +29,7 @@ dependencies {
     compile 'com.skyfishjy.ripplebackground:library:1.0.1'
     compile 'de.greenrobot:eventbus:2.4.0'
     compile 'com.wnafee:vector-compat:1.0.5'
+    compile 'com.balysv:material-ripple:1.0.2'
+    compile 'cat.ereza:customactivityoncrash:1.2.0'
     compile project(':holocolorpicker')
 }

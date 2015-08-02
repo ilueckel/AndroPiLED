@@ -14,6 +14,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import de.greenrobot.event.EventBus;
+import de.igorlueckel.andropiled.events.ColorChangedEvent;
+import de.igorlueckel.andropiled.events.DeviceDiscoveredEvent;
+import de.igorlueckel.andropiled.events.DevicesRequestEvent;
+import de.igorlueckel.andropiled.events.DevicesResponseEvent;
 import de.igorlueckel.andropiled.handlers.IncomingPacketHandler;
 import de.igorlueckel.andropiled.helpers.Preferences;
 import de.igorlueckel.andropiled.helpers.UdpMessenger;
@@ -27,7 +32,7 @@ public class NetworkService extends IntentService {
     private final IBinder mBinder = new NetworkBinder();
 
     UdpMessenger udpMessenger;
-    List<LedDevice> discoveredRaspberryAddress;
+    List<LedDevice> discoveredRaspberryAddresses;
     Thread discoveredRaspberryThread;
     ExecutorService executorService = Executors.newCachedThreadPool();
 
@@ -42,24 +47,26 @@ public class NetworkService extends IntentService {
                 if (response.equals("Pi here")) {
                     LedDevice device = new LedDevice();
                     device.setAddress(datagramPacket.getAddress());
-                    if (!discoveredRaspberryAddress.contains(device))
-                        discoveredRaspberryAddress.add(device);
-//                    Preferences preferences = new Preferences(NetworkService.this);
-//                    preferences.getEditor().putString("connection.lastip", discoveredRaspberryAddress.toString()).commit();
-//                    EventBus.getDefault().postSticky(new DeviceDiscoveredEvent("connected"));
+                    if (!discoveredRaspberryAddresses.contains(device)) {
+                        discoveredRaspberryAddresses.add(device);
+                        EventBus.getDefault().post(new DeviceDiscoveredEvent(device));
+                    }
                 }
             }
         };
-        discoveredRaspberryAddress = new ArrayList<>();
+        discoveredRaspberryAddresses = new ArrayList<>();
         udpMessenger = new UdpMessenger(this);
         udpMessenger.addIncomingPacketHandler(incomingPacketHandler);
         discoveredRaspberryThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    while (discoveredRaspberryAddress.isEmpty()) {
+                    while (discoveredRaspberryAddresses != null) {
                         checkForIp();
-                        TimeUnit.SECONDS.sleep(1);
+                        if (discoveredRaspberryAddresses.isEmpty())
+                            TimeUnit.SECONDS.sleep(5);
+                        else
+                            TimeUnit.SECONDS.sleep(30);
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -81,6 +88,18 @@ public class NetworkService extends IntentService {
         return mBinder;
     }
 
+    @Override
+    public void onStart(Intent intent, int startId) {
+        super.onStart(intent, startId);
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
+    }
+
     public class NetworkBinder extends Binder {
         public NetworkService getService(){
             return NetworkService.this;
@@ -96,7 +115,6 @@ public class NetworkService extends IntentService {
         Log.i("", "Checking for IP");
         Preferences preferences = new Preferences(this);
         String ip = preferences.getSharedPreferences().getString("connection.lastip", "");
-        assert ip != null;
         if (ip.isEmpty()) {
             Log.i("", "Sending broadcast");
             udpMessenger.sendBroadcastMessage("Hello PiLed", 6802);
@@ -109,8 +127,8 @@ public class NetworkService extends IntentService {
                     Log.i("", "IP is reachable");
                     LedDevice device = new LedDevice();
                     device.setAddress(potentialAddress);
-                    if (!discoveredRaspberryAddress.contains(device))
-                        discoveredRaspberryAddress.add(device);
+                    if (!discoveredRaspberryAddresses.contains(device))
+                        discoveredRaspberryAddresses.add(device);
                 } else {
                     Log.i("", "IP is not reachable. Sending broadcast.");
                     udpMessenger.sendBroadcastMessage("Hello PiLed", 6802);
@@ -122,7 +140,11 @@ public class NetworkService extends IntentService {
         }
     }
 
-    public List<LedDevice> getDiscoveredRaspberryAddress() {
-        return discoveredRaspberryAddress;
+    public List<LedDevice> getDiscoveredRaspberryAddresses() {
+        return discoveredRaspberryAddresses;
+    }
+
+    public void onEvent(DevicesRequestEvent event) {
+        EventBus.getDefault().post(new DevicesResponseEvent(getDiscoveredRaspberryAddresses()));
     }
 }

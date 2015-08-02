@@ -1,19 +1,39 @@
 package de.igorlueckel.andropiled;
 
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import cat.ereza.customactivityoncrash.CustomActivityOnCrash;
+import de.igorlueckel.andropiled.services.NetworkService;
+
 
 public class MainActivity extends AppCompatActivity {
+
+    NetworkService networkService;
+    boolean networkServiceBound;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        CustomActivityOnCrash.install(this);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Intent networkServiceIntent = new Intent(getApplicationContext(), NetworkService.class);
+        networkServiceIntent.putExtra("action", "start Discovery");
+        //bindService(networkServiceIntent, mConnection, Context.BIND_AUTO_CREATE);
+        startService(networkServiceIntent);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -36,4 +56,21 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    /** Defines callbacks for service binding, passed to bindService() */
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            NetworkService.NetworkBinder binder = (NetworkService.NetworkBinder) service;
+            networkService = binder.getService();
+            networkServiceBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            networkServiceBound = false;
+        }
+    };
 }

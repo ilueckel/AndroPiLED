@@ -135,8 +135,7 @@ public class UdpMessenger {
         ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
-        if(mWifi == null || !mWifi.isConnected())
-        {
+        if(mWifi == null || !mWifi.isConnected()) {
             Log.d(DEBUG_TAG, "Sorry! You need to be in a WiFi network in order to send UDP multicast packets. Aborting.");
             return false;
         }
