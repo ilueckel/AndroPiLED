@@ -15,13 +15,15 @@ public class SimpleColor extends AbstractAnimation {
     public SimpleColor(int color) {
         setIsInfinite(false);
         setTickDuration(0);
-        ledDevice = EventBus.getDefault().getStickyEvent(DeviceSelectedEvent.class).getDevice();
+        DeviceSelectedEvent deviceSelectedEvent = EventBus.getDefault().getStickyEvent(DeviceSelectedEvent.class);
+        if (deviceSelectedEvent != null)
+            ledDevice = deviceSelectedEvent.getDevice();
         this.color = color;
     }
 
     @Override
     public void run() {
-        if (getNetworkService() == null || isStopped())
+        if (ledDevice == null || getNetworkService() == null || isStopped())
             return;
 
         String colorCode = intColorToHex(color);

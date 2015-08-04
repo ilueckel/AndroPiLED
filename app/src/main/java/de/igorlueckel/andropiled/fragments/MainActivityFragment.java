@@ -17,6 +17,7 @@ import android.widget.Toast;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import de.greenrobot.event.EventBus;
+import de.igorlueckel.andropiled.MainActivity;
 import de.igorlueckel.andropiled.R;
 import de.igorlueckel.andropiled.events.ColorChangedEvent;
 import de.igorlueckel.andropiled.events.DeviceSelectedEvent;
@@ -41,6 +42,11 @@ public class MainActivityFragment extends Fragment {
     @InjectView(R.id.app_bar_layout)
     AppBarLayout appBarLayout;
 
+    @InjectView(R.id.coordinator_layout)
+    CoordinatorLayout coordinatorLayout;
+
+    MainActivity mainActivity;
+
     public MainActivityFragment() {
     }
 
@@ -52,6 +58,7 @@ public class MainActivityFragment extends Fragment {
         setupTabTextColor();
         setupViewPager();
         setupToolbar();
+        mainActivity = ((MainActivity) getActivity());
         return view;
     }
 
@@ -110,6 +117,22 @@ public class MainActivityFragment extends Fragment {
             }
         };
         mViewPager.setAdapter(adapter);
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                mainActivity.checkForConnectedDevice(coordinatorLayout, position);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
         mTabLayout.setupWithViewPager(mViewPager);//this is the new nice thing ;D
     }
 

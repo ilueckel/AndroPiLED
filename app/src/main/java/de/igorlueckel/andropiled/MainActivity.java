@@ -6,12 +6,18 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import cat.ereza.customactivityoncrash.CustomActivityOnCrash;
+import de.greenrobot.event.EventBus;
 import de.igorlueckel.andropiled.animation.AbstractAnimation;
+import de.igorlueckel.andropiled.events.DeviceSelectedEvent;
 import de.igorlueckel.andropiled.services.NetworkService;
 
 
@@ -19,12 +25,15 @@ public class MainActivity extends AppCompatActivity {
 
     NetworkService networkService;
     boolean networkServiceBound;
+    Snackbar snackbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         CustomActivityOnCrash.install(this);
+        ButterKnife.inject(this);
+        EventBus.getDefault().register(this);
 
         Intent networkServiceIntent = new Intent(getApplicationContext(), NetworkService.class);
         networkServiceIntent.putExtra("action", "start Discovery");
@@ -81,6 +90,18 @@ public class MainActivity extends AppCompatActivity {
             networkService.setCurrentAnimation(abstractAnimation);
     }
 
+    public void checkForConnectedDevice(CoordinatorLayout coordinatorLayout, int tabPosition) {
+        if (tabPosition == 0 && snackbar != null) {
+            snackbar.dismiss();
+            snackbar = null;
+            return;
+        }
+        if (tabPosition > 0 && networkServiceBound && networkService.getSelectedDevice() == null) {
+            snackbar = Snackbar.make(coordinatorLayout, "No device selected", Snackbar.LENGTH_LONG);
+            snackbar.show();
+        }
+    }
+
     /** Defines callbacks for service binding, passed to bindService() */
     private ServiceConnection mConnection = new ServiceConnection() {
 
@@ -97,4 +118,10 @@ public class MainActivity extends AppCompatActivity {
             networkServiceBound = false;
         }
     };
+
+    public void onEvent(DeviceSelectedEvent deviceSelectedEvent) {
+        if (deviceSelectedEvent != null && deviceSelectedEvent.getDevice() != null)
+            if (snackbar != null)
+                snackbar.dismiss();
+    }
 }

@@ -9,7 +9,7 @@ public class LedDevice {
     String name;
     InetAddress address;
     boolean selected = false;
-    int numLeds;
+    int numLeds = 50;
 
     public LedDevice() {
         setName("Test");

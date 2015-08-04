@@ -94,19 +94,9 @@ public class NetworkService extends IntentService {
         String dataString = intent.getStringExtra("action");
         if (dataString != null && dataString.equals("start Discovery")) {
             initalizeDiscovery();
-            //showNotification();
         }
         if (dataString != null && dataString.equals("stop")) {
-            EventBus.getDefault().unregister(this);
-            udpMessenger.stopMessageReceiver();
-            executorService.shutdown();
-            try {
-                executorService.awaitTermination(1, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            stopped = true;
-            hideNotification();
+            stopService();
         }
         if (dataString != null && dataString.equals("show notification")) {
             showNotification();
@@ -114,6 +104,19 @@ public class NetworkService extends IntentService {
         if (dataString != null && dataString.equals("hide notification")) {
             hideNotification();
         }
+    }
+
+    void stopService() {
+        EventBus.getDefault().unregister(this);
+        udpMessenger.stopMessageReceiver();
+        executorService.shutdown();
+        try {
+            executorService.awaitTermination(1, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        stopped = true;
+        hideNotification();
     }
 
     @Override
@@ -131,6 +134,9 @@ public class NetworkService extends IntentService {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if (currentAnimation == null || !currentAnimation.isAlive())
+            return;
+        stopService();
     }
 
     public class NetworkBinder extends Binder {
@@ -246,5 +252,9 @@ public class NetworkService extends IntentService {
         if (selectedDevice != null) {
             udpMessenger.sendData(message, selectedDevice.getAddress(), 6803);
         }
+    }
+
+    public LedDevice getSelectedDevice() {
+        return selectedDevice;
     }
 }

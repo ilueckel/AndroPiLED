@@ -13,7 +13,9 @@ import com.larswerkman.holocolorpicker.SVBar;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import de.greenrobot.event.EventBus;
+import de.igorlueckel.andropiled.MainActivity;
 import de.igorlueckel.andropiled.R;
+import de.igorlueckel.andropiled.animation.SimpleColor;
 import de.igorlueckel.andropiled.events.ColorChangedEvent;
 
 
@@ -29,11 +31,16 @@ public class ColorWheelFragment extends Fragment {
     @InjectView(R.id.svbar)
     SVBar svBar;
 
+    MainActivity mainActivity;
+
     ColorPicker.OnColorChangedListener onColorChangedListener = new ColorPicker.OnColorChangedListener() {
         @Override
         public void onColorChanged(int color) {
             colorPicker.setOldCenterColor(color);
             EventBus.getDefault().post(new ColorChangedEvent(color));
+
+            SimpleColor simpleColor = new SimpleColor(color);
+            mainActivity.forwardAnimation(simpleColor);
         }
     };
 
@@ -69,6 +76,7 @@ public class ColorWheelFragment extends Fragment {
         ButterKnife.inject(this, root);
         colorPicker.addSVBar(svBar);
         colorPicker.setOnColorChangedListener(onColorChangedListener);
+        mainActivity = (MainActivity) getActivity();
         return root;
     }
 
