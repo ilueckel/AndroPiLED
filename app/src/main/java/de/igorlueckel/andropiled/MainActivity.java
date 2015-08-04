@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import cat.ereza.customactivityoncrash.CustomActivityOnCrash;
+import de.igorlueckel.andropiled.animation.AbstractAnimation;
 import de.igorlueckel.andropiled.services.NetworkService;
 
 
@@ -24,14 +25,32 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         CustomActivityOnCrash.install(this);
+
+        Intent networkServiceIntent = new Intent(getApplicationContext(), NetworkService.class);
+        networkServiceIntent.putExtra("action", "start Discovery");
+        bindService(networkServiceIntent, mConnection, Context.BIND_AUTO_CREATE);
+        startService(networkServiceIntent);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        Intent networkServiceIntent2 = new Intent(getApplicationContext(), NetworkService.class);
+        networkServiceIntent2.putExtra("action", "hide notification");
+        startService(networkServiceIntent2);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
         Intent networkServiceIntent = new Intent(getApplicationContext(), NetworkService.class);
-        networkServiceIntent.putExtra("action", "start Discovery");
-        bindService(networkServiceIntent, mConnection, Context.BIND_AUTO_CREATE);
+        networkServiceIntent.putExtra("action", "show notification");
         startService(networkServiceIntent);
     }
 
@@ -55,6 +74,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void forwardAnimation(AbstractAnimation abstractAnimation) {
+        if (networkServiceBound)
+            networkService.setCurrentAnimation(abstractAnimation);
     }
 
     /** Defines callbacks for service binding, passed to bindService() */

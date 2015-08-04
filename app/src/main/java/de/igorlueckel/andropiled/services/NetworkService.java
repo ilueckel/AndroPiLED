@@ -1,6 +1,9 @@
 package de.igorlueckel.andropiled.services;
 
 import android.app.IntentService;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
@@ -15,8 +18,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import de.greenrobot.event.EventBus;
-import de.igorlueckel.andropiled.events.ColorChangedEvent;
-import de.igorlueckel.andropiled.events.DeviceDiscoveredEvent;
+import de.igorlueckel.andropiled.MainActivity;
+import de.igorlueckel.andropiled.R;
+import de.igorlueckel.andropiled.animation.AbstractAnimation;
 import de.igorlueckel.andropiled.events.DeviceSelectedEvent;
 import de.igorlueckel.andropiled.events.DevicesRequestEvent;
 import de.igorlueckel.andropiled.events.DevicesResponseEvent;
@@ -30,12 +34,16 @@ import de.igorlueckel.andropiled.models.LedDevice;
  */
 public class NetworkService extends IntentService {
 
+    static int notificationId = 6802;
+
     private final IBinder mBinder = new NetworkBinder();
 
     UdpMessenger udpMessenger;
     List<LedDevice> discoveredRaspberryAddresses;
     Thread discoveredRaspberryThread;
     ExecutorService executorService = Executors.newCachedThreadPool();
+    boolean stopped = false;
+    AbstractAnimation currentAnimation;
 
     // Active device
     LedDevice selectedDevice;
@@ -67,7 +75,7 @@ public class NetworkService extends IntentService {
                     for (int i = 0; i < 10; i++)
                         checkForIp();
 
-                    while (discoveredRaspberryAddresses != null) {
+                    while (discoveredRaspberryAddresses != null && !stopped) {
                         if (discoveredRaspberryAddresses.isEmpty())
                             TimeUnit.SECONDS.sleep(5);
                         else
@@ -84,8 +92,27 @@ public class NetworkService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         String dataString = intent.getStringExtra("action");
-        if (dataString.equals("start Discovery")) {
+        if (dataString != null && dataString.equals("start Discovery")) {
             initalizeDiscovery();
+            //showNotification();
+        }
+        if (dataString != null && dataString.equals("stop")) {
+            EventBus.getDefault().unregister(this);
+            udpMessenger.stopMessageReceiver();
+            executorService.shutdown();
+            try {
+                executorService.awaitTermination(1, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            stopped = true;
+            hideNotification();
+        }
+        if (dataString != null && dataString.equals("show notification")) {
+            showNotification();
+        }
+        if (dataString != null && dataString.equals("hide notification")) {
+            hideNotification();
         }
     }
 
@@ -97,20 +124,13 @@ public class NetworkService extends IntentService {
     @Override
     public void onStart(Intent intent, int startId) {
         super.onStart(intent, startId);
-        EventBus.getDefault().register(this);
+        if (!EventBus.getDefault().isRegistered(this))
+            EventBus.getDefault().register(this);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        EventBus.getDefault().unregister(this);
-        udpMessenger.stopMessageReceiver();
-        executorService.shutdown();
-        try {
-            executorService.awaitTermination(1, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     public class NetworkBinder extends Binder {
@@ -178,5 +198,53 @@ public class NetworkService extends IntentService {
             }
         }
         return -1;
+    }
+
+    void showNotification() {
+        if (currentAnimation == null || !currentAnimation.isAlive())
+            return;
+
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        Intent stopIntent = new Intent(this, NetworkService.class);
+        stopIntent.putExtra("action", "stop");
+        PendingIntent pendingIntentStop = PendingIntent.getService(this, 0, stopIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        // build notification
+        // the addAction re-use the same intent to keep the example short
+        Notification notification = new Notification.Builder(this)
+                .setContentTitle("AndroPiLed")
+                .setContentText("Netzwerkservice ist aktiv und steuert die LEDs")
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentIntent(pIntent)
+                .setOngoing(true)
+                .addAction(R.drawable.ic_stop, "Stop", pendingIntentStop)
+                .addAction(R.drawable.ic_wb_incandescent, "Turn off", pIntent)
+                .build();
+
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+        notificationManager.notify(notificationId, notification);
+    }
+
+    void hideNotification() {
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.cancel(notificationId);
+    }
+
+    public void setCurrentAnimation(AbstractAnimation abstractAnimation) {
+        this.currentAnimation = abstractAnimation;
+        this.currentAnimation.setNetworkService(this);
+        this.currentAnimation.start();
+    }
+
+    public void sendMessage(String message) {
+        if (selectedDevice != null) {
+            udpMessenger.sendData(message, selectedDevice.getAddress(), 6803);
+        }
     }
 }

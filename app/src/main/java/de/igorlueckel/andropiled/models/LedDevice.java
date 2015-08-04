@@ -9,6 +9,7 @@ public class LedDevice {
     String name;
     InetAddress address;
     boolean selected = false;
+    int numLeds;
 
     public LedDevice() {
         setName("Test");
@@ -36,6 +37,14 @@ public class LedDevice {
 
     public void setSelected(boolean selected) {
         this.selected = selected;
+    }
+
+    public int getNumLeds() {
+        return numLeds;
+    }
+
+    public void setNumLeds(int numLeds) {
+        this.numLeds = numLeds;
     }
 
     @Override

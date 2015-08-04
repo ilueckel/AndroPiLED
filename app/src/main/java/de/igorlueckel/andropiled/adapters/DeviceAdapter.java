@@ -50,7 +50,7 @@ public class DeviceAdapter extends AbstractListAdapter<LedDevice, DeviceAdapter.
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if (isChecked) {
                         ledDevice.setSelected(true);
-                        EventBus.getDefault().post(new DeviceSelectedEvent(ledDevice));
+                        EventBus.getDefault().postSticky(new DeviceSelectedEvent(ledDevice));
                     }
                 }
             });

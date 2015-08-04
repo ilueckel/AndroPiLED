@@ -1,0 +1,16 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:width="32dp"
+    android:height="32dp"
+    android:viewportWidth="24.0"
+    android:viewportHeight="24.0"
+    app:vc_viewportHeight="24.0"
+    app:vc_viewportWidth="24.0"
+    tools:targetApi="lollipop">
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="@string/path_wb_incandescent"
+        app:vc_fillColor="#FF000000"
+        app:vc_pathData="@string/path_wb_incandescent"/>/>
+</vector>
