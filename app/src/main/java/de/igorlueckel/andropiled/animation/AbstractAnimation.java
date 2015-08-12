@@ -13,6 +13,7 @@ public abstract class AbstractAnimation extends Thread {
     NetworkService networkService;
     boolean stopped = false;
     int[] lastColor;
+    NetworkService.AnimationEventHandler animationEventHandler;
 
     public boolean isInfinite() {
         return isInfinite;
@@ -52,5 +53,13 @@ public abstract class AbstractAnimation extends Thread {
 
     public void setLastColor(int[] lastColor) {
         this.lastColor = lastColor;
+    }
+
+    public NetworkService.AnimationEventHandler getAnimationEventHandler() {
+        return animationEventHandler;
+    }
+
+    public void setAnimationEventHandler(NetworkService.AnimationEventHandler animationEventHandler) {
+        this.animationEventHandler = animationEventHandler;
     }
 }

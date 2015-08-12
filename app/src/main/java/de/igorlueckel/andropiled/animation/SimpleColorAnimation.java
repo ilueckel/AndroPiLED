@@ -49,6 +49,8 @@ public class SimpleColorAnimation extends AbstractAnimation {
     public void run() {
         if (ledDevice == null || getNetworkService() == null || isStopped())
             return;
+        if (getAnimationEventHandler() != null)
+            getAnimationEventHandler().onAnimationStarted();
 
         // 2-dimension array: LED-ID | HSV data
         final float[][] hsvStartColor = new float[ledDevice.getNumLeds()][3];
@@ -95,5 +97,8 @@ public class SimpleColorAnimation extends AbstractAnimation {
             } catch (InterruptedException ignore) { }
             currentSteps += 1;
         }
+
+        if (getAnimationEventHandler() != null)
+            getAnimationEventHandler().onAnimationFinished();
     }
 }

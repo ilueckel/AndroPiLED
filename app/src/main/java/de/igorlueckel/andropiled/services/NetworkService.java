@@ -45,6 +45,7 @@ public class NetworkService extends IntentService {
     ExecutorService executorService = Executors.newCachedThreadPool();
     boolean stopped = false;
     AbstractAnimation currentAnimation;
+    boolean destroyCalled = false;
 
     // Active device
     LedDevice selectedDevice;
@@ -116,8 +117,8 @@ public class NetworkService extends IntentService {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        stopped = true;
         hideNotification();
+        stopped = true;
     }
 
     @Override
@@ -128,6 +129,7 @@ public class NetworkService extends IntentService {
     @Override
     public void onStart(Intent intent, int startId) {
         super.onStart(intent, startId);
+        destroyCalled = false;
         if (!EventBus.getDefault().isRegistered(this))
             EventBus.getDefault().register(this);
 
@@ -139,12 +141,13 @@ public class NetworkService extends IntentService {
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
-
+        stopped = false;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+        destroyCalled = true;
         if (currentAnimation == null || !currentAnimation.isAlive())
             return;
         stopService();
@@ -262,6 +265,7 @@ public class NetworkService extends IntentService {
     public void setCurrentAnimation(AbstractAnimation abstractAnimation) {
         this.currentAnimation = abstractAnimation;
         this.currentAnimation.setNetworkService(this);
+        this.currentAnimation.setAnimationEventHandler(animationEventHandler);
         this.currentAnimation.start();
     }
 
@@ -293,5 +297,22 @@ public class NetworkService extends IntentService {
 
     public AbstractAnimation getCurrentAnimation() {
         return currentAnimation;
+    }
+
+    AnimationEventHandler animationEventHandler = new AnimationEventHandler() {
+        @Override
+        public void onAnimationStarted() {
+
+        }
+
+        @Override
+        public void onAnimationFinished() {
+            hideNotification();
+        }
+    };
+
+    public interface AnimationEventHandler {
+        void onAnimationStarted();
+        void onAnimationFinished();
     }
 }
