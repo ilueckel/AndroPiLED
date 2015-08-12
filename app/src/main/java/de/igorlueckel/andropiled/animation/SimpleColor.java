@@ -1,5 +1,7 @@
 package de.igorlueckel.andropiled.animation;
 
+import android.graphics.Color;
+
 import de.greenrobot.event.EventBus;
 import de.igorlueckel.andropiled.events.DeviceSelectedEvent;
 import de.igorlueckel.andropiled.models.LedDevice;
@@ -26,12 +28,10 @@ public class SimpleColor extends AbstractAnimation {
         if (ledDevice == null || getNetworkService() == null || isStopped())
             return;
 
-        String colorCode = intColorToHex(color);
-        String output = "";
-        for (int i = 0; i < ledDevice.getNumLeds(); i++) {
-            output = output + colorCode;
-        }
-        setLastColor(color);
-        getNetworkService().sendMessage(output);
+        int[] colorsToSend = new int[ledDevice.getNumLeds()];
+        for (int i = 0; i < ledDevice.getNumLeds(); i++)
+            colorsToSend[i] = color;
+        setLastColor(colorsToSend);
+        getNetworkService().sendColor(colorsToSend);
     }
 }

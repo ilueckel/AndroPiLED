@@ -13,4 +13,5 @@ public class StripAnimation extends AbstractAnimation {
     public void run() {
 
     }
+
 }

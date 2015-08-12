@@ -21,7 +21,7 @@ import de.igorlueckel.andropiled.handlers.IncomingPacketHandler;
  * Created by Igor on 12.06.2015.
  */
 public class UdpMessenger {
-    protected static String DEBUG_TAG = "UDPMessenger";
+    protected static String DEBUG_TAG = "";
     protected static final Integer BUFFER_SIZE = 4096;
 
     private boolean receiveMessages = false;
@@ -56,7 +56,7 @@ public class UdpMessenger {
      * @return Returns a boolean indicating if sending the message was successful.
      * @throws IllegalArgumentException
      */
-    public boolean sendData(String message, InetAddress targetIP, int multicastPort) throws IllegalArgumentException {
+    public boolean sendColorData(String message, InetAddress targetIP, int multicastPort) throws IllegalArgumentException {
         if(message == null || message.length() == 0 ||  multicastPort <= 1024 || multicastPort > 49151)
             throw new IllegalArgumentException();
 
@@ -97,6 +97,66 @@ public class UdpMessenger {
             public void run() {
                 try {
                     socket.send(packet);
+                    Log.i(DEBUG_TAG, "Packet sent");
+                } catch (IOException e) {
+                    Log.d(DEBUG_TAG, "There was an error sending the UDP packet. Aborted.");
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        thread.start();
+        return true;
+    }
+
+    /**
+     * Sends a broadcast message (TAG EPOCH_TIME message). Opens a new socket in case it's closed.
+     * @param message the message to send (multicast). It can't be null or 0-characters long.
+     * @return Returns a boolean indicating if sending the message was successful.
+     * @throws IllegalArgumentException
+     */
+    public boolean sendData(String message, InetAddress targetIP, int multicastPort) throws IllegalArgumentException {
+        if(message == null || message.length() == 0 ||  multicastPort <= 1024 || multicastPort > 49151)
+            throw new IllegalArgumentException();
+
+        // Check for WiFi connectivity
+        ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+
+        if(mWifi == null || !mWifi.isConnected()) {
+            Log.d(DEBUG_TAG, "Sorry! You need to be in a WiFi network to control your LEDs.");
+            return false;
+        }
+
+        // Create the send socket
+        if(socket == null) {
+            try {
+                socket = new DatagramSocket();
+            } catch (SocketException e) {
+                Log.d(DEBUG_TAG, "There was a problem creating the sending socket. Aborting.");
+                e.printStackTrace();
+                return false;
+            }
+        }
+
+        // Build the packet
+        final DatagramPacket packet;
+        byte data[] = message.getBytes();
+
+        try {
+            packet = new DatagramPacket(data, data.length, targetIP, multicastPort);
+        } catch (Exception e) {
+            Log.d(DEBUG_TAG, e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+
+        Thread thread = new Thread(new Runnable(){
+            @Override
+            public void run() {
+                try {
+                    socket.send(packet);
+                    Log.i(DEBUG_TAG, "Packet sent");
                 } catch (IOException e) {
                     Log.d(DEBUG_TAG, "There was an error sending the UDP packet. Aborted.");
                     e.printStackTrace();
@@ -170,6 +230,7 @@ public class UdpMessenger {
             public void run() {
                 try {
                     socket.send(packet);
+                    Log.i(DEBUG_TAG, "Packet sent");
                 } catch (IOException e) {
                     Log.d(DEBUG_TAG, "There was an error sending the UDP packet. Aborted.");
                     e.printStackTrace();

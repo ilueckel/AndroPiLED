@@ -12,7 +12,7 @@ public abstract class AbstractAnimation extends Thread {
     long tickDuration;
     NetworkService networkService;
     boolean stopped = false;
-    int lastColor;
+    int[] lastColor;
 
     public boolean isInfinite() {
         return isInfinite;
@@ -46,28 +46,11 @@ public abstract class AbstractAnimation extends Thread {
         return stopped;
     }
 
-//    public void stop() {
-//        stopped = true;
-//    }
-
-    public int getLastColor() {
+    public int[] getLastColor() {
         return lastColor;
     }
 
-    public void setLastColor(int lastColor) {
+    public void setLastColor(int[] lastColor) {
         this.lastColor = lastColor;
-    }
-
-    /**
-     * Ignores alpha
-     * @param color
-     * @return
-     */
-    public String intColorToHex(int color) {
-        String hexcode = Integer.toHexString(color);
-        if (hexcode.startsWith("ff") && hexcode.length() > 6){
-            hexcode = hexcode.substring(2);
-        }
-        return hexcode;
     }
 }

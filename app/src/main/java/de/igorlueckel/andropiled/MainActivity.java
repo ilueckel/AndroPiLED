@@ -124,4 +124,8 @@ public class MainActivity extends AppCompatActivity {
             if (snackbar != null)
                 snackbar.dismiss();
     }
+
+    public NetworkService getNetworkService() {
+        return networkService;
+    }
 }

@@ -1,7 +1,9 @@
 package de.igorlueckel.andropiled.fragments;
 
+import android.graphics.Color;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -14,15 +16,16 @@ import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+import java.util.concurrent.TimeUnit;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
 import de.igorlueckel.andropiled.MainActivity;
 import de.igorlueckel.andropiled.R;
+import de.igorlueckel.andropiled.animation.SimpleColorAnimation;
 import de.igorlueckel.andropiled.events.ColorChangedEvent;
-import de.igorlueckel.andropiled.events.DeviceSelectedEvent;
-import de.igorlueckel.andropiled.events.DevicesResponseEvent;
-import de.igorlueckel.andropiled.models.LedDevice;
 
 
 /**
@@ -44,6 +47,9 @@ public class MainActivityFragment extends Fragment {
 
     @InjectView(R.id.coordinator_layout)
     CoordinatorLayout coordinatorLayout;
+
+    @InjectView(R.id.buttonFadeToBlack)
+    FloatingActionButton floatingActionButton;
 
     MainActivity mainActivity;
 
@@ -126,6 +132,10 @@ public class MainActivityFragment extends Fragment {
             @Override
             public void onPageSelected(int position) {
                 mainActivity.checkForConnectedDevice(coordinatorLayout, position);
+                if (position == 0)
+                    floatingActionButton.setVisibility(View.GONE);
+                else
+                    floatingActionButton.setVisibility(View.VISIBLE);
             }
 
             @Override
@@ -141,6 +151,7 @@ public class MainActivityFragment extends Fragment {
         CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) mViewPager.getLayoutParams();
         layoutParams.bottomMargin = -getStatusBarHeight();
         mViewPager.setLayoutParams(layoutParams);
+        floatingActionButton.setVisibility(View.GONE);
     }
 
     public void onEvent(ColorChangedEvent event) {
@@ -157,5 +168,22 @@ public class MainActivityFragment extends Fragment {
             result = getResources().getDimensionPixelSize(resourceId);
         }
         return result;
+    }
+
+    @OnClick(R.id.buttonFadeToBlack)
+    void fadeToBlack() {
+        if (mainActivity.getNetworkService() != null && mainActivity.getNetworkService().getCurrentAnimation() != null) {
+            int[] lastColors = mainActivity.getNetworkService().getCurrentAnimation().getLastColor();
+            int[] targetColors = new int[mainActivity.getNetworkService().getSelectedDevice().getNumLeds()];
+            for (int i = 0; i < targetColors.length; i++) {
+                targetColors[i] = Color.BLACK;
+            }
+            try {
+                SimpleColorAnimation simpleColorAnimation = new SimpleColorAnimation(lastColors, targetColors, 5, TimeUnit.SECONDS);
+                mainActivity.getNetworkService().setCurrentAnimation(simpleColorAnimation);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

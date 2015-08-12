@@ -11,6 +11,7 @@ import android.util.Log;
 
 import java.net.DatagramPacket;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -129,6 +130,16 @@ public class NetworkService extends IntentService {
         super.onStart(intent, startId);
         if (!EventBus.getDefault().isRegistered(this))
             EventBus.getDefault().register(this);
+
+        LedDevice ledDevice = new LedDevice();
+        try {
+            ledDevice.setAddress(InetAddress.getByName("192.168.191.64"));
+            DeviceSelectedEvent deviceSelectedEvent = new DeviceSelectedEvent(ledDevice);
+            EventBus.getDefault().postSticky(deviceSelectedEvent);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Override
@@ -146,8 +157,14 @@ public class NetworkService extends IntentService {
     }
 
     private void initalizeDiscovery() {
-        executorService.submit(discoveredRaspberryThread);
         udpMessenger.startMessageReceiver();
+        try {
+            InetAddress potentialAddress = InetAddress.getByName("192.168.191.64");
+            udpMessenger.sendData("Hello PiLed", potentialAddress, 6802);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        executorService.submit(discoveredRaspberryThread);
     }
 
     private void checkForIp() {
@@ -248,13 +265,33 @@ public class NetworkService extends IntentService {
         this.currentAnimation.start();
     }
 
-    public void sendMessage(String message) {
-        if (selectedDevice != null) {
-            udpMessenger.sendData(message, selectedDevice.getAddress(), 6803);
+    public void sendColor(int[] colors) {
+        String message = "";
+        for (int color : colors) {
+            message = message + intColorToHex(color);
         }
+        final String finalMessage = message;
+        udpMessenger.sendColorData(finalMessage, selectedDevice.getAddress(), 6803);
+    }
+
+    /**
+     * Ignores alpha
+     * @param color Your color
+     * @return Returning a string representing the hexcode of the color
+     */
+    public String intColorToHex(int color) {
+        String hexcode = Integer.toHexString(color);
+        if (hexcode.startsWith("ff") && hexcode.length() > 6){
+            hexcode = hexcode.substring(2);
+        }
+        return hexcode;
     }
 
     public LedDevice getSelectedDevice() {
         return selectedDevice;
+    }
+
+    public AbstractAnimation getCurrentAnimation() {
+        return currentAnimation;
     }
 }
