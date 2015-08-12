@@ -299,7 +299,7 @@ public class NetworkService extends IntentService {
         return currentAnimation;
     }
 
-    AnimationEventHandler animationEventHandler = new AnimationEventHandler() {
+    AbstractAnimation.AnimationEventHandler animationEventHandler = new AbstractAnimation.AnimationEventHandler() {
         @Override
         public void onAnimationStarted() {
 
@@ -310,9 +310,4 @@ public class NetworkService extends IntentService {
             hideNotification();
         }
     };
-
-    public interface AnimationEventHandler {
-        void onAnimationStarted();
-        void onAnimationFinished();
-    }
 }
