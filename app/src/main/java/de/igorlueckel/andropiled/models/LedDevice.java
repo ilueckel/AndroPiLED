@@ -1,6 +1,7 @@
 package de.igorlueckel.andropiled.models;
 
 import java.net.InetAddress;
+import java.util.List;
 
 /**
  * Created by Igor on 29.07.2015.
@@ -10,6 +11,12 @@ public class LedDevice {
     InetAddress address;
     boolean selected = false;
     int numLeds = 50;
+
+    /**
+     * Matrix of the position of the LEDs
+     * First index is row, second is the column
+     */
+    Integer[][] ledPositionMatrix;
 
     public LedDevice() {
         setName("Test");
@@ -45,6 +52,14 @@ public class LedDevice {
 
     public void setNumLeds(int numLeds) {
         this.numLeds = numLeds;
+    }
+
+    public Integer[][] getLedPositionMatrix() {
+        return ledPositionMatrix;
+    }
+
+    public void setLedPositionMatrix(Integer[][] ledPositionMatrix) {
+        this.ledPositionMatrix = ledPositionMatrix;
     }
 
     @Override
