@@ -57,10 +57,7 @@ public class FadeToBlackAnimation extends AbstractAnimation {
         for (int i = 0; i < ledDevice.getNumLeds(); i++) {
             Color.colorToHSV(startColor[i], hsvStartColor[i]);
             Color.colorToHSV(endColor[i], hsvEndColor[i]);
-            hsvEndColor[i][1] = 0;
-
-            hsvSteps[i][0] = (hsvStartColor[i][0] - hsvEndColor[i][0]) / steps;
-            hsvSteps[i][1] = (hsvStartColor[i][1] - hsvEndColor[i][1]) / steps;
+            hsvEndColor[i][2] = 0;
             hsvSteps[i][2] = (hsvStartColor[i][2] - hsvEndColor[i][2]) / steps;
         }
 
@@ -74,8 +71,6 @@ public class FadeToBlackAnimation extends AbstractAnimation {
             Log.i("", "Start calculation for step " + currentSteps);
             final int[] colorsToSend = new int[ledDevice.getNumLeds()];
             for (int i = 0; i < ledDevice.getNumLeds(); i++) {
-                hsvStartColor[i][0] = hsvStartColor[i][0] - hsvSteps[i][0];
-                hsvStartColor[i][1] = hsvStartColor[i][1] - hsvSteps[i][1];
                 hsvStartColor[i][2] = hsvStartColor[i][2] - hsvSteps[i][2];
 
                 int color = Color.HSVToColor(hsvStartColor[i]);

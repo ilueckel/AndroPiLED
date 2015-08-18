@@ -24,6 +24,7 @@ import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
 import de.igorlueckel.andropiled.MainActivity;
 import de.igorlueckel.andropiled.R;
+import de.igorlueckel.andropiled.animation.FadeToBlackAnimation;
 import de.igorlueckel.andropiled.animation.SimpleColorAnimation;
 import de.igorlueckel.andropiled.events.ColorChangedEvent;
 
@@ -179,7 +180,7 @@ public class MainActivityFragment extends Fragment {
                 targetColors[i] = Color.BLACK;
             }
             try {
-                SimpleColorAnimation simpleColorAnimation = new SimpleColorAnimation(lastColors, targetColors, 5, TimeUnit.SECONDS);
+                FadeToBlackAnimation simpleColorAnimation = new FadeToBlackAnimation(lastColors, 100, TimeUnit.MILLISECONDS);
                 mainActivity.getNetworkService().setCurrentAnimation(simpleColorAnimation);
             } catch (Exception e) {
                 e.printStackTrace();

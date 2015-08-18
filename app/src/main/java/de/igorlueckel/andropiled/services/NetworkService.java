@@ -22,6 +22,7 @@ import de.greenrobot.event.EventBus;
 import de.igorlueckel.andropiled.MainActivity;
 import de.igorlueckel.andropiled.R;
 import de.igorlueckel.andropiled.animation.AbstractAnimation;
+import de.igorlueckel.andropiled.animation.FadeToBlackAnimation;
 import de.igorlueckel.andropiled.events.DeviceSelectedEvent;
 import de.igorlueckel.andropiled.events.DevicesRequestEvent;
 import de.igorlueckel.andropiled.events.DevicesResponseEvent;
@@ -106,6 +107,13 @@ public class NetworkService extends IntentService {
         if (dataString != null && dataString.equals("hide notification")) {
             hideNotification();
         }
+        if (dataString != null && dataString.equals("fade black")) {
+            try {
+                setCurrentAnimation(new FadeToBlackAnimation(currentAnimation.getLastColor(), 1, TimeUnit.SECONDS));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     void stopService() {
@@ -133,14 +141,14 @@ public class NetworkService extends IntentService {
         if (!EventBus.getDefault().isRegistered(this))
             EventBus.getDefault().register(this);
 
-        LedDevice ledDevice = new LedDevice();
-        try {
-            ledDevice.setAddress(InetAddress.getByName("192.168.191.64"));
-            DeviceSelectedEvent deviceSelectedEvent = new DeviceSelectedEvent(ledDevice);
-            EventBus.getDefault().postSticky(deviceSelectedEvent);
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
+//        LedDevice ledDevice = new LedDevice();
+//        try {
+//            ledDevice.setAddress(InetAddress.getByName("192.168.191.64"));
+//            DeviceSelectedEvent deviceSelectedEvent = new DeviceSelectedEvent(ledDevice);
+//            EventBus.getDefault().postSticky(deviceSelectedEvent);
+//        } catch (UnknownHostException e) {
+//            e.printStackTrace();
+//        }
         stopped = false;
     }
 
@@ -238,6 +246,10 @@ public class NetworkService extends IntentService {
         stopIntent.putExtra("action", "stop");
         PendingIntent pendingIntentStop = PendingIntent.getService(this, 0, stopIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
+        Intent fadeBlackIntent = new Intent(this, NetworkService.class);
+        stopIntent.putExtra("action", "fade black");
+        PendingIntent pendingIntentFadeBlack = PendingIntent.getService(this, 0, fadeBlackIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
         // build notification
         // the addAction re-use the same intent to keep the example short
         Notification notification = new Notification.Builder(this)
@@ -247,7 +259,7 @@ public class NetworkService extends IntentService {
                 .setContentIntent(pIntent)
                 .setOngoing(true)
                 .addAction(R.drawable.ic_stop, "Stop", pendingIntentStop)
-                .addAction(R.drawable.ic_wb_incandescent, "Turn off", pIntent)
+                .addAction(R.drawable.ic_wb_incandescent, "Turn off", pendingIntentFadeBlack)
                 .build();
 
         NotificationManager notificationManager =
