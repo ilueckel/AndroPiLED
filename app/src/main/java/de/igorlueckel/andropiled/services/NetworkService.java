@@ -5,6 +5,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.net.TrafficStats;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
@@ -247,7 +248,7 @@ public class NetworkService extends IntentService {
         PendingIntent pendingIntentStop = PendingIntent.getService(this, 0, stopIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         Intent fadeBlackIntent = new Intent(this, NetworkService.class);
-        stopIntent.putExtra("action", "fade black");
+        fadeBlackIntent.putExtra("action", "fade black");
         PendingIntent pendingIntentFadeBlack = PendingIntent.getService(this, 0, fadeBlackIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
         // build notification
@@ -275,6 +276,8 @@ public class NetworkService extends IntentService {
     }
 
     public void setCurrentAnimation(AbstractAnimation abstractAnimation) {
+        if (this.currentAnimation != null)
+            this.currentAnimation.setStopped(true);
         this.currentAnimation = abstractAnimation;
         this.currentAnimation.setNetworkService(this);
         this.currentAnimation.setAnimationEventHandler(animationEventHandler);

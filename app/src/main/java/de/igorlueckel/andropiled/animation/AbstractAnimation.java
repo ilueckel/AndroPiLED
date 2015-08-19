@@ -47,6 +47,10 @@ public abstract class AbstractAnimation extends Thread {
         return stopped;
     }
 
+    public void setStopped(boolean stopped) {
+        this.stopped = stopped;
+    }
+
     public int[] getLastColor() {
         return lastColor;
     }

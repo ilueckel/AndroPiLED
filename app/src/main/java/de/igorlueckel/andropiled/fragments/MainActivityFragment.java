@@ -24,6 +24,7 @@ import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
 import de.igorlueckel.andropiled.MainActivity;
 import de.igorlueckel.andropiled.R;
+import de.igorlueckel.andropiled.animation.AutomaticColorWheel;
 import de.igorlueckel.andropiled.animation.FadeToBlackAnimation;
 import de.igorlueckel.andropiled.animation.SimpleColorAnimation;
 import de.igorlueckel.andropiled.events.ColorChangedEvent;
@@ -100,7 +101,7 @@ public class MainActivityFragment extends Fragment {
 
             @Override
             public int getCount() {
-                return 4;
+                return 3;
             }
 
             @Override
@@ -116,9 +117,9 @@ public class MainActivityFragment extends Fragment {
                     case 2:
                         title = getString(R.string.color_changer);
                         break;
-                    case 3:
-                        title = getString(R.string.equalizer);
-                        break;
+//                    case 3:
+//                        title = getString(R.string.equalizer);
+//                        break;
                 }
                 return title;
             }
@@ -174,17 +175,18 @@ public class MainActivityFragment extends Fragment {
     @OnClick(R.id.buttonFadeToBlack)
     void fadeToBlack() {
         if (mainActivity.getNetworkService() != null && mainActivity.getNetworkService().getCurrentAnimation() != null) {
-            int[] lastColors = mainActivity.getNetworkService().getCurrentAnimation().getLastColor();
-            int[] targetColors = new int[mainActivity.getNetworkService().getSelectedDevice().getNumLeds()];
-            for (int i = 0; i < targetColors.length; i++) {
-                targetColors[i] = Color.BLACK;
-            }
-            try {
-                FadeToBlackAnimation simpleColorAnimation = new FadeToBlackAnimation(lastColors, 100, TimeUnit.MILLISECONDS);
-                mainActivity.getNetworkService().setCurrentAnimation(simpleColorAnimation);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+//            int[] lastColors = mainActivity.getNetworkService().getCurrentAnimation().getLastColor();
+//            int[] targetColors = new int[mainActivity.getNetworkService().getSelectedDevice().getNumLeds()];
+//            for (int i = 0; i < targetColors.length; i++) {
+//                targetColors[i] = Color.BLACK;
+//            }
+//            try {
+//                FadeToBlackAnimation simpleColorAnimation = new FadeToBlackAnimation(lastColors, 500, TimeUnit.MILLISECONDS);
+//                mainActivity.getNetworkService().setCurrentAnimation(simpleColorAnimation);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+            mainActivity.getNetworkService().setCurrentAnimation(new AutomaticColorWheel());
         }
     }
 }
