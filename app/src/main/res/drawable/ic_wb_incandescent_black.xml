@@ -12,5 +12,5 @@
         android:fillColor="#FF000000"
         android:pathData="@string/path_wb_incandescent"
         app:vc_fillColor="#FF000000"
-        app:vc_pathData="@string/path_wb_incandescent"/>/>
+        app:vc_pathData="@string/path_wb_incandescent"/>
 </vector>

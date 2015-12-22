@@ -14,4 +14,9 @@
     <string name="path_phonelink_off">M22,6V4H6.82l2,2H22zM1.92,1.65L0.65,2.92l1.82,1.82C2.18,5.08 2,5.52 2,6v11H0v3h17.73l2.35,2.35 1.27,-1.27L3.89,3.62 1.92,1.65zM4,6.27L14.73,17H4V6.27zM23,8h-6c-0.55,0 -1,0.45 -1,1v4.18l2,2V10h4v7h-2.18l3,3H23c0.55,0 1,-0.45 1,-1V9c0,-0.55 -0.45,-1 -1,-1z</string>
     <string name="path_phonelink_ring">M20.1,7.7l-1,1c1.8,1.8 1.8,4.6 0,6.5l1,1c2.5,-2.3 2.5,-6.1 0,-8.5zM18,9.8l-1,1c0.5,0.7 0.5,1.6 0,2.3l1,1c1.2,-1.2 1.2,-3 0,-4.3zM14,1H4c-1.1,0 -2,0.9 -2,2v18c0,1.1 0.9,2 2,2h10c1.1,0 2,-0.9 2,-2V3c0,-1.1 -0.9,-2 -2,-2zm0,19H4V4h10v16z</string>
     <string name="path_wb_incandescent">M3.55,18.54l1.41,1.41 1.79,-1.8 -1.41,-1.41 -1.79,1.8zM11,22.45h2V19.5h-2v2.95zM4,10.5H1v2h3v-2zm11,-4.19V1.5H9v4.81C7.21,7.35 6,9.28 6,11.5c0,3.31 2.69,6 6,6s6,-2.69 6,-6c0,-2.22 -1.21,-4.15 -3,-5.19zm5,4.19v2h3v-2h-3zm-2.76,7.66l1.79,1.8 1.41,-1.41 -1.8,-1.79 -1.4,1.4z</string>
+    <string name="hostOrIp">Host oder IP</string>
+    <string name="add">Hinzufügen</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="automaticColorWheel">Automatisches Farbrad</string>
+    <string name="saveConnectionInDatabase">Verbindung in Datenbank speichern</string>
 </resources>

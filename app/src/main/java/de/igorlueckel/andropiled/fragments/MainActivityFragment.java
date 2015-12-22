@@ -1,5 +1,6 @@
 package de.igorlueckel.andropiled.fragments;
 
+import android.content.DialogInterface;
 import android.graphics.Color;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CoordinatorLayout;
@@ -9,13 +10,15 @@ import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
-import android.widget.Toast;
+import android.widget.EditText;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.ButterKnife;
@@ -26,8 +29,8 @@ import de.igorlueckel.andropiled.MainActivity;
 import de.igorlueckel.andropiled.R;
 import de.igorlueckel.andropiled.animation.AutomaticColorWheel;
 import de.igorlueckel.andropiled.animation.FadeToBlackAnimation;
-import de.igorlueckel.andropiled.animation.SimpleColorAnimation;
 import de.igorlueckel.andropiled.events.ColorChangedEvent;
+import de.igorlueckel.andropiled.models.LedDevice;
 
 
 /**
@@ -51,7 +54,10 @@ public class MainActivityFragment extends Fragment {
     CoordinatorLayout coordinatorLayout;
 
     @InjectView(R.id.buttonFadeToBlack)
-    FloatingActionButton floatingActionButton;
+    FloatingActionButton buttonFadeToBlack;
+
+    @InjectView(R.id.buttonAddDevice)
+    FloatingActionButton buttonAddDevice;
 
     MainActivity mainActivity;
 
@@ -95,6 +101,7 @@ public class MainActivityFragment extends Fragment {
                 switch (position) {
                     case 0: return ConnectionFragment.newInstance();
                     case 1: return ColorWheelFragment.newInstance();
+                    case 2: return EffectsFragment.newInstance();
                 }
                 return TabFragment.newInstance();
             }
@@ -134,10 +141,13 @@ public class MainActivityFragment extends Fragment {
             @Override
             public void onPageSelected(int position) {
                 mainActivity.checkForConnectedDevice(coordinatorLayout, position);
-                if (position == 0)
-                    floatingActionButton.setVisibility(View.GONE);
-                else
-                    floatingActionButton.setVisibility(View.VISIBLE);
+                if (position == 0) {
+                    buttonFadeToBlack.setVisibility(View.GONE);
+                    buttonAddDevice.setVisibility(View.VISIBLE);
+                } else {
+                    buttonFadeToBlack.setVisibility(View.VISIBLE);
+                    buttonAddDevice.setVisibility(View.GONE);
+                }
             }
 
             @Override
@@ -153,7 +163,8 @@ public class MainActivityFragment extends Fragment {
         CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) mViewPager.getLayoutParams();
         layoutParams.bottomMargin = -getStatusBarHeight();
         mViewPager.setLayoutParams(layoutParams);
-        floatingActionButton.setVisibility(View.GONE);
+        buttonFadeToBlack.setVisibility(View.GONE);
+        buttonAddDevice.setVisibility(View.VISIBLE);
     }
 
     public void onEvent(ColorChangedEvent event) {
@@ -175,18 +186,50 @@ public class MainActivityFragment extends Fragment {
     @OnClick(R.id.buttonFadeToBlack)
     void fadeToBlack() {
         if (mainActivity.getNetworkService() != null && mainActivity.getNetworkService().getCurrentAnimation() != null) {
-//            int[] lastColors = mainActivity.getNetworkService().getCurrentAnimation().getLastColor();
-//            int[] targetColors = new int[mainActivity.getNetworkService().getSelectedDevice().getNumLeds()];
-//            for (int i = 0; i < targetColors.length; i++) {
-//                targetColors[i] = Color.BLACK;
-//            }
-//            try {
-//                FadeToBlackAnimation simpleColorAnimation = new FadeToBlackAnimation(lastColors, 500, TimeUnit.MILLISECONDS);
-//                mainActivity.getNetworkService().setCurrentAnimation(simpleColorAnimation);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-            mainActivity.getNetworkService().setCurrentAnimation(new AutomaticColorWheel());
+            int[] lastColors = mainActivity.getNetworkService().getCurrentAnimation().getLastColor();
+            int[] targetColors = new int[mainActivity.getNetworkService().getSelectedDevice().getNumLeds()];
+            for (int i = 0; i < targetColors.length; i++) {
+                targetColors[i] = Color.BLACK;
+            }
+            try {
+                FadeToBlackAnimation simpleColorAnimation = new FadeToBlackAnimation(lastColors, 500, TimeUnit.MILLISECONDS);
+                mainActivity.getNetworkService().setCurrentAnimation(simpleColorAnimation);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+//            mainActivity.getNetworkService().setCurrentAnimation(new AutomaticColorWheel());
         }
+    }
+
+    @OnClick(R.id.buttonAddDevice)
+    void addDevice() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        // Get the layout inflater
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        final View dialogView = inflater.inflate(R.layout.dialog_adddevice, null);
+        // Inflate and set the layout for the dialog
+        // Pass null as the parent view because its going in the dialog layout
+        builder.setView(dialogView)
+                // Add action buttons
+                .setPositiveButton(R.string.add, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        // sign in the user ...
+                        EditText textBox = (EditText) dialogView.findViewById(R.id.host);
+                        LedDevice ledDevice = new LedDevice();
+                        try {
+                            ledDevice.setAddress(InetAddress.getByName(textBox.getText().toString()));
+                        } catch (UnknownHostException e) {
+                            e.printStackTrace();
+                        }
+                        mainActivity.getNetworkService().addDevice(ledDevice);
+                    }
+                })
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        // do nothing
+                    }
+                });
+        builder.create().show();
     }
 }

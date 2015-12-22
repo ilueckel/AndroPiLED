@@ -314,6 +314,13 @@ public class NetworkService extends IntentService {
         return currentAnimation;
     }
 
+    public void addDevice(LedDevice device) {
+        if (!discoveredRaspberryAddresses.contains(device)) {
+            discoveredRaspberryAddresses.add(device);
+            EventBus.getDefault().post(new DevicesResponseEvent(getDiscoveredRaspberryAddresses()));
+        }
+    }
+
     AbstractAnimation.AnimationEventHandler animationEventHandler = new AbstractAnimation.AnimationEventHandler() {
         @Override
         public void onAnimationStarted() {
